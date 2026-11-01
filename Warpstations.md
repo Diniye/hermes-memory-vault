@@ -19,3 +19,10 @@ Detail protokol: skill `warpstations-ops`.
 - **Session fetch gotchas**: cred/backend IP bisa rotate per-fetch (bukan bukti restart). Desktop stopped -> session endpoint = 409 "not ready". Cross-compartment wrapper error saat evaluate di page web-client -> pindah ke tab page biasa.
 - **Cron lokal di-pause**: desktop-idle-guard (bisa pegang slot viewer + ganggu daemon) & linode-watchdog (linode mati). Resume manual kalau perlu.
 - Farm 5 LIGHTVELA VPS: bridge VPS2 LIVE (camoufox 0.4.11 + bundle 133-beta.19 + playwright 1.49), /cookies transplant OK, session API 200. wt_keepalive E2E = diblok WT-reject di atas.
+
+## SOLUSI keepalive (02-11): real-Chromium viewer
+- **Root cause saga**: desktop-nya emang MATI (restart-ku malam itu gagal boot -> "Stopped"). Bukan anti-keepalive policy! VM zombie = kenapa semua koneksi (aioquic + WASM camoufox) ditolak sebelumnya. Setelah Start via UI lokal: server TERIMA browser asli, NOLAK aioquic (filter fingerprint non-browser sejak ~23-10).
+- **Resep produksi**: Chromium vanilla (playwright, headless, --no-sandbox) + inject SESSION cookies -> goto `/desktops/<tab>/web-client` -> "Connected" + frames naik = viewer aktif = idle timer ke-reset terus. Gak perlu handshake WT reverse-engineered lagi.
+- `wt_viewer.py` (VPS5 `~/warpfarm/keepalive/`) + unit `wt-viewer-pedantic.service` (active): health-check 45s (Connected?/frames naik?), reload kalau unhealthy, dormant-loop kalau desktop stopped (409). RAM ~400 MB/box.
+- aioquic `wt_keepalive.py` = RETIRED (ditolak server). Camoufox = RETIRED utk console (WAF blok fingerprint-nya; Chromium vanilla lolos).
+- Cookie SESSION = SPOF: kalau expired, viewer mati + relogin dari VPS = WAF-403 -> refresh cookie harus via UI lokal (login -> export -> scp).
