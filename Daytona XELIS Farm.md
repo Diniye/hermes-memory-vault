@@ -11,3 +11,4 @@ Detail operasional lengkap: skill `daytona-ops`.
 - Token SSH sandbox: mint TTL 1440 mnt, refresh watchdog tiap 5 jam (patch 2026-10-27 di VPS3-6; VPS1-2 menunggu credential).
 - Pool: herominers XELIS. Wallet farm + angka live -> cek API pool, jangan hafalkan.
 - Aturan: tiap error dilaporkan + solusi; recon sambil jalan.
+- 2026-11-06: SEMUA host (vps1-6 + linode) unreachable — SSH timeout, TCP/22 & ICMP 0/3 dari 4 node check-host.net. Bukan jaringan lokal (8.8.8.8 OK), bukan provider-wide (status DO hijau, no incidents). Suspect: suspension akun (DO AUP mining + signup automation, Linode ikut). Perlu cek dashboard DO/Linode + email notice.
